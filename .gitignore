@@ -1,2 +1,3 @@
 .android/*
 .vscode/*
+__pycache__/*

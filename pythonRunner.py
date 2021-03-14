@@ -1,119 +1,93 @@
-import subprocess
+
 from time import sleep
-
-sleepyTime = 0.35
-
-
-def executeAdbCommand(values):
-    cmd = ['./adb.exe', *values]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    process.wait()
+from CsvExtractor import CsvExtractor
+from AdbInteractor import AdbInteractor as adb
 
 
-def tap(x, y):
-    executeAdbCommand(['shell', 'input', 'tap', str(x), str(y)])
-    sleep(sleepyTime)
+class Renamer:
 
+    def __init__(self, sleepyTime):
+        self.sleepyTime = sleepyTime
+        self.csvExtractor = CsvExtractor()
 
-def swipe(xStart, yStart, xEnd, yEnd, time):
-    executeAdbCommand(['shell', 'input', 'swipe', str(
-        xStart), str(yStart), str(xEnd), str(yEnd), str(time)])
-    sleep(sleepyTime)
+    def pressThreeLines(self):
+        # Following line spreads the tuple returned by the extractor into x and y
+        adb.tap(*self.csvExtractor.getCoordinatesFor('threeLines'))
+        sleep(self.sleepyTime)
 
+    def pressAppraise(self):
+        adb.tap(*self.csvExtractor.getCoordinatesFor('appraise'))
+        sleep(self.sleepyTime)
 
-def hold(x, y, time):
-    executeAdbCommand(['shell', 'input', 'swipe', str(
-        x), str(y), str(x), str(y), str(time)])
-    sleep(sleepyTime)
+    def tapSomewhereLeft(self):
+        # TODO: Make this a bit more random
+        adb.tap(450, 1700)
+        sleep(self.sleepyTime)
 
+    def tapName(self):
+        adb.tap(*self.csvExtractor.getCoordinatesFor('name'))
+        sleep(self.sleepyTime)
 
-def pressThreeLines():
-    tap(921, 2050)
-    sleep(sleepyTime)
+    def holdBackspace(self):
+        adb.hold(
+            *self.csvExtractor.getCoordinatesFor('backspace'), 998)
+        sleep(self.sleepyTime)
 
+    def holdNameLine(self):
+        adb.hold(
+            *self.csvExtractor.getCoordinatesFor('nameLine'), 583)
+        sleep(self.sleepyTime)
 
-def pressAppraise():
-    tap(955, 1620)
-    sleep(sleepyTime)
+    def tapPaste(self):
+        adb.tap(*self.csvExtractor.getCoordinatesFor('paste'))
+        sleep(self.sleepyTime)
 
+    def tapKeyboardOk(self):
+        adb.tap(*self.csvExtractor.getCoordinatesFor('keyboardOk'))
+        sleep(self.sleepyTime)
 
-def tapSomewhereLeft():
-    # TODO: Make this a bit more random
-    tap(450, 1700)
-    sleep(sleepyTime)
+    def tapPokemongoOk(self):
+        adb.tap(*self.csvExtractor.getCoordinatesFor('pokemongoOk'))
+        sleep(self.sleepyTime)
 
+    def swipeToNextPokemon(self):
+        # TODO: Make this a bit more random
+        adb.swipe(1022, 1376, 645, 1354, 564)
+        sleep(self.sleepyTime)
 
-def tapName():
-    tap(530, 930)
-    sleep(sleepyTime)
+    def performAppraisal(self):
+        self.pressThreeLines()
+        self.pressAppraise()
+        self.tapSomewhereLeft()
+        sleep(1.5)
+        self.tapSomewhereLeft()
 
+    def performRename(self):
+        self.tapName()
+        self.holdBackspace()
+        self.holdNameLine()
+        self.tapPaste()
+        self.tapKeyboardOk()
+        self.tapPokemongoOk()
 
-def holdBackspace():
-    hold(1013, 1866, 998)
-    sleep(sleepyTime)
+    def getNumberOfPokemonToRename(self):
+        while True:
+            value = input('Enter the number of pokemon to rename: ')
+            if value.isdigit():
+                return int(value)
+            print("Please enter a valid positive number")
 
-
-def holdNameLine():
-    hold(737, 1134, 583)
-    sleep(sleepyTime)
-
-
-def tapPaste():
-    tap(125, 987)
-    sleep(sleepyTime)
-
-
-def tapKeyboardOk():
-    tap(960, 1134)
-    sleep(sleepyTime)
-
-
-def tapPokemongoOk():
-    tap(580, 1195)
-    sleep(sleepyTime)
-
-
-def swipeToNextPokemon():
-    # TODO: Make this a bit more random
-    swipe(1022, 1376, 645, 1354, 564)
-    sleep(sleepyTime)
-
-
-def performAppraisal():
-    pressThreeLines()
-    pressAppraise()
-    tapSomewhereLeft()
-    sleep(1.5)
-    tapSomewhereLeft()
-
-
-def performRename():
-    tapName()
-    holdBackspace()
-    holdNameLine()
-    tapPaste()
-    tapKeyboardOk()
-    tapPokemongoOk()
-
-
-def getNumberOfPokemonToRename():
-    while True:
-        value = input('Enter the number of pokemon to rename: ')
-        if value.isdigit():
-            return int(value)
-        print("Please enter a valid positive number")
-
-
-def main():
-    numberOfPokemonToRename = getNumberOfPokemonToRename()
-    counter = 0
-    while counter < numberOfPokemonToRename:
-        performAppraisal()
-        performRename()
-        swipeToNextPokemon()
-        print("Finshed renaming " + str(counter) + " pokemon")
-        counter += 1
+    def rename(self):
+        numberOfPokemonToRename = self.getNumberOfPokemonToRename()
+        counter = 0
+        while counter < numberOfPokemonToRename:
+            self.performAppraisal()
+            self.performRename()
+            self.swipeToNextPokemon()
+            counter += 1
+            print("Finshed renaming " + str(counter) + " pokemon")
 
 
 if __name__ == "__main__":
-    main()
+    renamer = Renamer(0.5)
+    renamer.rename()
