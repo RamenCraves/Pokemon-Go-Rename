@@ -1,5 +1,7 @@
 import subprocess
-import time
+from time import sleep
+
+sleepyTime = 0.35
 
 
 def executeAdbCommand(values):
@@ -8,60 +10,90 @@ def executeAdbCommand(values):
     process.wait()
 
 
-def tapOnLocation(x, y):
+def tap(x, y):
     executeAdbCommand(['shell', 'input', 'tap', str(x), str(y)])
+    sleep(sleepyTime)
 
 
-def swipe(xStart, yStart, time, xEnd=-1, yEnd=-1):
-    if xEnd == -1:
-        xEnd = xStart
-
-    if yEnd == -1:
-        yEnd = yStart
-
+def swipe(xStart, yStart, xEnd, yEnd, time):
     executeAdbCommand(['shell', 'input', 'swipe', str(
         xStart), str(yStart), str(xEnd), str(yEnd), str(time)])
+    sleep(sleepyTime)
+
+
+def hold(x, y, time):
+    executeAdbCommand(['shell', 'input', 'swipe', str(
+        x), str(y), str(x), str(y), str(time)])
+    sleep(sleepyTime)
 
 
 def pressThreeLines():
-    tapOnLocation(921, 2265)
+    tap(921, 2050)
+    sleep(sleepyTime)
 
 
 def pressAppraise():
-    tapOnLocation(955, 1871)
+    tap(955, 1620)
+    sleep(sleepyTime)
 
 
 def tapSomewhereLeft():
     # TODO: Make this a bit more random
-    tapOnLocation(450, 1700)
+    tap(450, 1700)
+    sleep(sleepyTime)
 
 
 def tapName():
-    tapOnLocation(530, 1030)
+    tap(530, 930)
+    sleep(sleepyTime)
 
 
 def holdBackspace():
-    swipe(986, 2090, 998)
+    hold(1013, 1866, 998)
+    sleep(sleepyTime)
 
 
 def holdNameLine():
-    swipe(782, 1475, 583)
+    hold(737, 1134, 583)
+    sleep(sleepyTime)
 
 
 def tapPaste():
-    tapOnLocation(132, 1374)
+    tap(125, 987)
+    sleep(sleepyTime)
 
 
 def tapKeyboardOk():
-    tapOnLocation(955, 1490)
+    tap(960, 1134)
+    sleep(sleepyTime)
 
 
 def tapPokemongoOk():
-    tapOnLocation(550, 1360)
+    tap(580, 1195)
+    sleep(sleepyTime)
 
 
 def swipeToNextPokemon():
-    swipe(1022, 1376, 564, 645, 1354)
+    # TODO: Make this a bit more random
+    swipe(1022, 1376, 645, 1354, 564)
+    sleep(sleepyTime)
+
+
+def performAppraisal():
+    pressThreeLines()
+    pressAppraise()
+    tapSomewhereLeft()
+    sleep(1.5)
+    tapSomewhereLeft()
+
+
+def performRename():
+    tapName()
+    holdBackspace()
+    holdNameLine()
+    tapPaste()
+    tapKeyboardOk()
+    tapPokemongoOk()
 
 
 def getNumberOfPokemonToRename():
@@ -76,18 +108,10 @@ def main():
     numberOfPokemonToRename = getNumberOfPokemonToRename()
     counter = 0
     while counter < numberOfPokemonToRename:
-        pressThreeLines()
-        pressAppraise()
-        tapSomewhereLeft()
-        time.sleep(1)
-        tapSomewhereLeft()
-        tapName()
-        holdBackspace()
-        holdNameLine()
-        tapPaste()
-        tapKeyboardOk()
-        tapPokemongoOk()
+        performAppraisal()
+        performRename()
         swipeToNextPokemon()
+        print("Finshed renaming " + str(counter) + " pokemon")
         counter += 1
 
 
