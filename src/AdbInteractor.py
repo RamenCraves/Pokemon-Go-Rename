@@ -6,7 +6,7 @@ class AdbInteractor:
 
     @staticmethod
     def executeAdbCommand(values):
-        cmd = ['./adb.exe', *values]
+        cmd = ['./ADBfiles/adb.exe', *values]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         process.wait()
 
